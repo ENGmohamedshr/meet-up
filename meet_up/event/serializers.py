@@ -14,7 +14,9 @@ class EventSerializer(serializers.ModelSerializer):
     members = MemberSerializer(many=True,required=False)
     class Meta:
         model =  Event 
-        fields = ['id','topic','num_of_members','category','place','time','members']
+        # fields = ['id','topic','num_of_members','category','place','time','members']
+        # fields = '__all__'
+        exclude =['is_active','created_by']
         
         
     

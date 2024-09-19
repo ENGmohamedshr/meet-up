@@ -1,5 +1,6 @@
 
 from ast import mod
+from pyexpat import model
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import module_loading
@@ -35,16 +36,20 @@ class PlaceGovernrate(models.TextChoices):
     NORTH_SINAI = 'north_sinai', 'North Sinai'
     BEHEIRA = 'beheira', 'Beheira'
 
+    ONLINE = 'online' ,'Online'
 class Place(models.Model):
     
-    name = models.CharField(max_length=250)
-    desc = models.TextField()
-    governrate = models.CharField(max_length=250 , choices=PlaceGovernrate.choices,)
+    name                = models.CharField(max_length=250)
+    desc                = models.TextField(blank=True)
+    governrate          = models.CharField(max_length=250 , choices=PlaceGovernrate.choices,)
     # lat = models.CharField()
     
     
     def __str__(self) -> str:
         return self.name
+    
+    
+
 class Category(models.Model):
     class CategoryName(models.TextChoices):
         DESIGN ='design','Design'
@@ -52,24 +57,23 @@ class Category(models.Model):
         ENGLISH = 'english','English'
         
     
-    name = models.CharField(max_length=150 , choices=CategoryName.choices)
+    name                = models.CharField(max_length=150 , choices=CategoryName.choices)
     
     def __str__(self) -> str:
         return self.name
 
 class Event(models.Model):
-    created_by = models.ForeignKey(User , on_delete=models.CASCADE)
-    topic = models.CharField(max_length=250)
-    num_of_members = models.DecimalField(max_digits=10,decimal_places=0,
+    created_by          = models.ForeignKey(User , on_delete=models.CASCADE)
+    topic               = models.CharField(max_length=250)
+    num_of_members      = models.DecimalField(max_digits=10,decimal_places=0,
                                          validators=[MinValueValidator(3) ],default=3 )
-    
-    category = models.ForeignKey(Category, on_delete=models.PROTECT , null =True )
-    
-    place = models.ForeignKey(Place , on_delete=models.PROTECT )
-    
-    time = models.DateTimeField()
-    
-    is_active = models.BooleanField(verbose_name='active',default=True)
+    category            = models.ForeignKey(Category, on_delete=models.PROTECT , null =True )
+    place               = models.ForeignKey(Place , on_delete=models.PROTECT )
+    time                = models.DateTimeField()
+    fees                = models.DecimalField(verbose_name='join fees',max_digits=100, decimal_places=2, default=0.00)
+    is_online           = models.BooleanField(verbose_name='online status' , default=False)
+    is_paid             = models.BooleanField(verbose_name='is paid' , default=False)
+    is_active           = models.BooleanField(verbose_name='active',default=True)
     
     def member_count(self):
         return self.members.count()
@@ -80,8 +84,8 @@ class Event(models.Model):
     
 
 class Member(models.Model):
-    user = models.ForeignKey(User , on_delete=models.CASCADE)
-    event = models.ForeignKey(Event , on_delete=models.CASCADE , related_name='members')
+    user                = models.ForeignKey(User , on_delete=models.CASCADE)
+    event               = models.ForeignKey(Event , on_delete=models.CASCADE , related_name='members')
     
     class Meta:
         constraints = [

@@ -1,14 +1,15 @@
 
-
-from functools import partial
-from django.db.migrations import serializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import action, authentication_classes, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+
+from event.models import Event, Member
+from event.serializers import EventSerializer
 
 from .models import Profile
 from .serializers import LoginSerializer, ProfileSerializer, SignUpSerializer, UserSerializers
@@ -74,7 +75,7 @@ class ProfileViewSetApi(viewsets.ViewSet):
         
     
     @action(detail=False , methods=['patch','put'] ,url_path='edit-profile' )
-    def editPic(self,request,*args, **kwargs):
+    def editProfile(self,request,*args, **kwargs):
         try:
             user = request.user 
             # image = request.data['profile_pic']
@@ -96,3 +97,15 @@ class ProfileViewSetApi(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     
+    
+    @action(detail=False , methods=['get'],url_path='joined-events')
+    def getJoinedEvent(self , request,*args, **kwargs):
+        try:
+            user = request.user
+            
+            events = Event.objects.filter(members__user = user)
+            serializer = EventSerializer(events , many = True)
+            
+            return Response(serializer.data , status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)

@@ -76,6 +76,8 @@ class Profile(models.Model):
     last_name = models.CharField(max_length=200 ,blank=True)
     image = models.FileField(upload_to=user_profile_img_path)
     bio = models.TextField(blank=True)
+    wallet = models.DecimalField(verbose_name='wallet' , max_digits=100 , decimal_places=2 , default=0.00)
+    gender = models.CharField(verbose_name='gender' ,max_length=100, blank=True , null =True )
 
     def __str__(self) -> str:
         return f"{self.user.username}'s profile"
