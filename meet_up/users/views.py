@@ -1,4 +1,5 @@
 
+from curses import OK
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
@@ -6,12 +7,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 from event.models import Event, Member
 from event.serializers import EventSerializer
 
-from .models import Profile
+from .models import EmailConfirmationToken, Profile
 from .serializers import LoginSerializer, ProfileSerializer, SignUpSerializer, UserSerializers
 
 # Create your views here.
@@ -109,3 +111,17 @@ class ProfileViewSetApi(viewsets.ViewSet):
             return Response(serializer.data , status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class VerifyEmailApiView(APIView):
+    def get(self,request,token):
+        verification_token = get_object_or_404(EmailConfirmationToken,token = token)
+        
+        user= verification_token.user
+        user.is_active = True
+        
+        user.save()
+        
+        verification_token.delete()
+        
+        return Response({'message':"Email was verified successfully".capitalize()} , status=status.HTTP_200_OK)

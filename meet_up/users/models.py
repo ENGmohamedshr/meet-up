@@ -1,6 +1,7 @@
-
+import threading
 import os
 from typing import Any
+import uuid
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, UserManager
 from django.db import models
@@ -40,6 +41,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_superuser = models.BooleanField(verbose_name='superuser status',default=False)
     last_login = models.DateTimeField(verbose_name='Last Login',blank=True,null=True)
     
+    is_active = models.BooleanField(default=False )
     pro_user = models.BooleanField(verbose_name='is_Pro',default=False)
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"
@@ -104,3 +106,11 @@ class Skills(models.Model):
     
     def __str__(self) -> str:
         return f"{self.profile.user.username}'s skills"
+    
+    
+class EmailConfirmationToken(models.Model):
+    user =  models.ForeignKey(User ,on_delete=models.CASCADE)
+    token =models.UUIDField(default=uuid.uuid4 , unique=True)
+    created_at = models.DateTimeField(auto_now=True)
+    
+    
